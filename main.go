@@ -44,13 +44,23 @@ func flagPotentialAttacker(remoteAddr, username, details string) {
 }
 
 func isSuspiciousCommand(cmd string) bool {
-	suspiciousKeywords := []string{"rm", "chmod", "cat", "wget", "curl", "nc", "netcat", "sudo", "su"}
+	suspiciousKeywords := []string{
+        "rm", "chmod", "cat", "wget", "curl", "nc", "netcat", "sudo", "su",
+		"dd", "mkfs", "chown", "chgrp", "fdisk", "mkfs.ext4", "mount", "umount",
+		"iptables", "firewall-cmd", "ncat", "masscan", "nmap", "tcpdump", "hping",
+		"tshark", "wireshark", "ps", "top", "htop", "lsof", "kill", "killall",
+		"systemctl", "service", "pkexec", "crontab", "at", "setuid", "setgid",
+		"chattr", "openssl", "base64", "tar", "gzip", "bzip2", "unzip", "scp",
+		"sftp", "ftp", "ssh", "python", "python3", "perl", "ruby", "java",
+		"docker", "kubectl", "helm",                  
+    }
 	for _, kw := range suspiciousKeywords {
 		if strings.Contains(cmd, kw) {
 			return true
 		}
 	}
 	return false
+	
 }
 
 func startFrontendServer() {
@@ -173,8 +183,68 @@ func handleConnection(conn net.Conn) {
 }
 
 
+// func fakeShell(conn net.Conn, reader *bufio.Reader, remoteAddr, username string) {
+// 	welcomeMsg := fmt.Sprintf("Welcome %s! You now have limited shell access. Type 'exit' to disconnect.\n", username)
+// 	_, err := conn.Write([]byte(welcomeMsg))
+// 	if err != nil {
+// 		logrus.Errorf("Error sending welcome message to %s: %v", remoteAddr, err)
+// 		return
+// 	}
+
+// 	for {
+// 		_, err := conn.Write([]byte("$ "))
+// 		if err != nil {
+// 			logrus.Errorf("Error sending shell prompt to %s: %v", remoteAddr, err)
+// 			break
+// 		}
+
+// 		cmd, err := reader.ReadString('\n')
+// 		if err != nil {
+// 			logrus.Infof("Connection closed by %s during shell session.", remoteAddr)
+// 			break
+// 		}
+// 		cmd = strings.TrimSpace(cmd)
+// 		logrus.Infof("Command from %s: %s", remoteAddr, cmd)
+
+		
+// 		if err := AddShellCommandToDB(remoteAddr, cmd); err != nil {
+// 			logrus.Errorf("Error storing shell command in DB: %v", err)
+// 		}
+
+// 		// Check if the command is suspicious.
+// 		if isSuspiciousCommand(cmd) {
+// 			flagPotentialAttacker(remoteAddr, username, fmt.Sprintf("Suspicious command: %s", cmd))
+// 		}
+
+// 		if cmd == "exit" {
+// 			_, _ = conn.Write([]byte("Bye!\n"))
+// 			logrus.Infof("Session with %s ended", remoteAddr)
+// 			break
+// 		}
+
+// 		response := fmt.Sprintf("bash: %s: command not found\n", cmd)
+// 		_, err = conn.Write([]byte(response))
+// 		if err != nil {
+// 			logrus.Errorf("Error sending response to %s: %v", remoteAddr, err)
+// 			break
+// 		}
+// 	}
+
+// 	time.Sleep(1 * time.Second)
+// }
+
 func fakeShell(conn net.Conn, reader *bufio.Reader, remoteAddr, username string) {
-	welcomeMsg := fmt.Sprintf("Welcome %s! You now have limited shell access. Type 'exit' to disconnect.\n", username)
+	// Simulate a basic current working directory and a fake file system.
+	cwd := "/" // current working directory
+	// A simple fake file system: map of "full file path" to file content.
+	fakeFS := map[string]string{
+		"/etc/passwd":         "root:x:0:0:root:/root:/bin/bash\nuser:x:1000:1000:user:/home/user:/bin/bash",
+		"/var/log/auth.log":   "Mar 01 13:53:23 server sshd[1234]: Failed password for root from 192.0.2.1 port 22 ssh2",
+		"/home/user/notes.txt": "This is a fake note file for demonstration purposes.",
+	}
+
+	// Welcome message with a help prompt.
+	welcomeMsg := fmt.Sprintf("Welcome %s! You now have limited shell access.\nType 'help' for available commands, or 'exit' to disconnect.\n", username)
 	_, err := conn.Write([]byte(welcomeMsg))
 	if err != nil {
 		logrus.Errorf("Error sending welcome message to %s: %v", remoteAddr, err)
@@ -182,12 +252,15 @@ func fakeShell(conn net.Conn, reader *bufio.Reader, remoteAddr, username string)
 	}
 
 	for {
-		_, err := conn.Write([]byte("$ "))
+		// Display prompt with current working directory.
+		prompt := fmt.Sprintf("%s$ ", cwd)
+		_, err := conn.Write([]byte(prompt))
 		if err != nil {
 			logrus.Errorf("Error sending shell prompt to %s: %v", remoteAddr, err)
 			break
 		}
 
+		// Read command input.
 		cmd, err := reader.ReadString('\n')
 		if err != nil {
 			logrus.Infof("Connection closed by %s during shell session.", remoteAddr)
@@ -196,7 +269,71 @@ func fakeShell(conn net.Conn, reader *bufio.Reader, remoteAddr, username string)
 		cmd = strings.TrimSpace(cmd)
 		logrus.Infof("Command from %s: %s", remoteAddr, cmd)
 
-		
+		// Process the command.
+		switch {
+		case cmd == "exit":
+			_, _ = conn.Write([]byte("Bye!\n"))
+			logrus.Infof("Session with %s ended", remoteAddr)
+			return
+		case cmd == "help":
+			helpText := "Available commands: help, ls, pwd, cd <dir>, cat <file>, exit\n"
+			_, _ = conn.Write([]byte(helpText))
+		case cmd == "pwd":
+			_, _ = conn.Write([]byte(cwd + "\n"))
+		case cmd == "ls":
+			// List files in the fake file system that are in the current directory.
+			var files []string
+			for path := range fakeFS {
+				// For simplicity, assume files are at root or in a single level directory.
+				if cwd == "/" && strings.HasPrefix(path, "/") {
+					files = append(files, path[1:]) // remove leading '/'
+				} else if strings.HasPrefix(path, cwd) {
+					files = append(files, strings.TrimPrefix(path, cwd))
+				}
+			}
+			if len(files) == 0 {
+				_, _ = conn.Write([]byte("No files found.\n"))
+			} else {
+				_, _ = conn.Write([]byte(strings.Join(files, "\n") + "\n"))
+			}
+		case strings.HasPrefix(cmd, "cat "):
+			parts := strings.SplitN(cmd, " ", 2)
+			if len(parts) < 2 {
+				_, _ = conn.Write([]byte("Usage: cat <filename>\n"))
+				continue
+			}
+			filename := strings.TrimSpace(parts[1])
+			fullPath := cwd
+			if cwd == "/" {
+				fullPath = "/" + filename
+			} else {
+				fullPath = cwd + filename
+			}
+			if content, ok := fakeFS[fullPath]; ok {
+				_, _ = conn.Write([]byte(content + "\n"))
+			} else {
+				_, _ = conn.Write([]byte(fmt.Sprintf("cat: %s: No such file or directory\n", filename)))
+			}
+		case strings.HasPrefix(cmd, "cd "):
+			parts := strings.SplitN(cmd, " ", 2)
+			if len(parts) < 2 {
+				_, _ = conn.Write([]byte("Usage: cd <directory>\n"))
+				continue
+			}
+			dir := strings.TrimSpace(parts[1])
+			// For demonstration, allow only cd to "/" or a single level directory.
+			if dir == "/" {
+				cwd = "/"
+			} else {
+				cwd = "/" + dir + "/"
+			}
+			_, _ = conn.Write([]byte("Changed directory to " + cwd + "\n"))
+		default:
+			// For unknown commands, simulate a bash error.
+			_, _ = conn.Write([]byte(fmt.Sprintf("bash: %s: command not found\n", cmd)))
+		}
+
+		// Log the command to MongoDB (if implemented).
 		if err := AddShellCommandToDB(remoteAddr, cmd); err != nil {
 			logrus.Errorf("Error storing shell command in DB: %v", err)
 		}
@@ -204,19 +341,6 @@ func fakeShell(conn net.Conn, reader *bufio.Reader, remoteAddr, username string)
 		// Check if the command is suspicious.
 		if isSuspiciousCommand(cmd) {
 			flagPotentialAttacker(remoteAddr, username, fmt.Sprintf("Suspicious command: %s", cmd))
-		}
-
-		if cmd == "exit" {
-			_, _ = conn.Write([]byte("Bye!\n"))
-			logrus.Infof("Session with %s ended", remoteAddr)
-			break
-		}
-
-		response := fmt.Sprintf("bash: %s: command not found\n", cmd)
-		_, err = conn.Write([]byte(response))
-		if err != nil {
-			logrus.Errorf("Error sending response to %s: %v", remoteAddr, err)
-			break
 		}
 	}
 

@@ -13,3 +13,21 @@ Time: 2025-03-01 19:23:45, IP: [::1]:57240, Username: jiangly, Details: Exceeded
 Time: 2025-03-01 19:24:17, IP: [::1]:57240, Username: jiangly, Details: Suspicious command: cat
 Time: 2025-03-02 07:26:03, IP: 127.0.0.1:58005, Username: Accept-Encoding: gzip, deflate, br, zstd, Details: Exceeded login attempt threshold
 Time: 2025-03-02 07:26:03, IP: 127.0.0.1:58011, Username: Accept-Encoding: gzip, deflate, br, zstd, Details: Exceeded login attempt threshold
+Time: 2025-03-02 09:15:23, IP: 127.0.0.1:50374, Username: arin, Details: Exceeded login attempt threshold
+Time: 2025-03-02 09:15:43, IP: 127.0.0.1:50374, Username: arin, Details: Suspicious command: cat
+Time: 2025-03-02 09:26:23, IP: 127.0.0.1:50844, Username: htfuytr, Details: Exceeded login attempt threshold
+Time: 2025-03-02 09:26:56, IP: 127.0.0.1:50844, Username: htfuytr, Details: Suspicious command: excat[C=[C
+Time: 2025-03-02 09:27:03, IP: 127.0.0.1:50844, Username: htfuytr, Details: Suspicious command: cat
+Time: 2025-03-02 09:53:38, IP: 127.0.0.1:51180, Username: tourist, Details: Exceeded login attempt threshold
+Time: 2025-03-02 09:54:00, IP: 127.0.0.1:51180, Username: tourist, Details: Suspicious command: cat[4~
+Time: 2025-03-02 09:58:33, IP: 127.0.0.1:51285, Username: ritik, Details: Exceeded login attempt threshold
+Time: 2025-03-02 10:05:10, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: loda[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[B[C[C[C[C[C[Csddsdsdultasdf
+Time: 2025-03-02 10:06:40, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: netcatcd..
+Time: 2025-03-02 10:07:21, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: netcat
+Time: 2025-03-02 10:07:31, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: ntetcat
+Time: 2025-03-02 10:13:40, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: cat
+Time: 2025-03-02 10:15:36, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: cat new.txt
+Time: 2025-03-02 10:22:33, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: cat shivam.taxt
+Time: 2025-03-02 10:23:19, IP: 127.0.0.1:51285, Username: ritik, Details: Suspicious command: cat npotsees.txty
+Time: 2025-03-02 10:25:24, IP: 127.0.0.1:51750, Username: dominator, Details: Exceeded login attempt threshold
+Time: 2025-03-02 10:26:16, IP: 127.0.0.1:51750, Username: dominator, Details: Suspicious command: cat jnotes.txt

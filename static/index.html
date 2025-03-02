@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HoneyPot Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>HoneyPot Dashboard</h1>
+    <p>Monitor attacker activity and view session logs</p>
+  </header>
+  
+  <section class="stats">
+    <div class="stat-box">
+      <h2>Active Sessions</h2>
+      <p id="active-sessions">0</p>
+    </div>
+    <div class="stat-box">
+      <h2>Total Attacks</h2>
+      <p id="total-attacks">0</p>
+    </div>
+  </section>
+  
+  <section class="logs">
+    <h2>Attacker Logs</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>IP Address</th>
+          <th>Username</th>
+          <th>Details</th>
+        </tr>
+      </thead>
+      <tbody id="logs-body">
+        <!-- Log rows will be inserted here dynamically -->
+        <tr>
+          <td>2025-03-01 13:53:23</td>
+          <td>192.0.2.1</td>
+          <td>admin</td>
+          <td>Exceeded login attempt threshold</td>
+        </tr>
+        <!-- Example static row -->
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 HoneyPot</p>
+  </footer>
+
+  <!-- Optionally, add a script to fetch live data from your API endpoint -->
+  <!-- 
+  <script>
+    // Example: fetch logs from a /api/logs endpoint and update the table.
+    fetch('/api/logs')
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.getElementById('logs-body');
+        tbody.innerHTML = '';
+        data.forEach(log => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${log.time}</td>
+                           <td>${log.ip}</td>
+                           <td>${log.username}</td>
+                           <td>${log.details}</td>`;
+          tbody.appendChild(row);
+        });
+      });
+  </script>
+  -->
+</body>
+</html>
